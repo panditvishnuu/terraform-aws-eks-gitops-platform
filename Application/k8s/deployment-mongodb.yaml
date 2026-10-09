@@ -1,0 +1,19 @@
+kind: Deployment
+metadata:
+  name: relay-db
+  namespace: relay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relay-db
+  template:
+    metadata:
+      labels:
+        app: relay-db
+    spec:
+      containers:
+        - name: relay-db
+          image: mongo:latest
+          ports:
+            - containerPort: 27017
