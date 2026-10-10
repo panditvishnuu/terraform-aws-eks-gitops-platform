@@ -56,3 +56,23 @@ variable "tags" {
     Owner = "platform-team"
   }
 }
+
+variable "eks_cluster_role_arn" {
+  type        = string
+  description = "ARN of the existing EKS cluster IAM role with AmazonEKSClusterPolicy attached"
+}
+
+variable "eks_node_role_arn" {
+  type        = string
+  description = "ARN of the existing worker-node IAM role with the required EKS worker policies attached"
+}
+
+variable "cluster_endpoint_public_access_cidrs" {
+  type        = list(string)
+  description = "Trusted CIDR blocks allowed to access the public Kubernetes API endpoint"
+
+  validation {
+    condition     = length(var.cluster_endpoint_public_access_cidrs) > 0
+    error_message = "Provide at least one trusted CIDR for public Kubernetes API access."
+  }
+}

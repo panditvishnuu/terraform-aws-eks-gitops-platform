@@ -9,9 +9,16 @@ resource "aws_subnet" "public" {
   availability_zone       = each.value.az
   map_public_ip_on_launch = true
 
-  tags = merge(local.common_tags, {
-    Name = "${local.resource_name_prefix}-public-subnet-${each.key}"
-  })
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.resource_name_prefix}-public-subnet-${each.key}"
+    },
+    var.eks_enabled ? {
+      "kubernetes.io/cluster/${var.project_name}-${var.environment}" = "shared"
+      "kubernetes.io/role/elb"                                       = "1"
+    } : {}
+  )
 }
 
 resource "aws_route_table" "public" {
