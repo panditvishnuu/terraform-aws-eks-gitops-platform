@@ -1,0 +1,17 @@
+# Ignore local Terraform directories
+.terraform/
+
+# Ignore CLI configuration files
+.terraform.rc
+terraform.rc
+
+# Ignore log files
+crash.log
+terraform.log
+
+# Ignore TF state files (they contain secrets!)
+*.tfstate
+*.tfstate.*
+
+# DO NOT ignore .terraform.lock.hcl if you want to lock provider versions across your team.
+# But if you accidentally staged it and want it out for now, you can leave it out.
