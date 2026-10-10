@@ -18,6 +18,14 @@ output "private_subnet_ids" {
   value       = [for subnet in aws_subnet.private : subnet.id]
 }
 
+output "private_subnet_availability_zones" {
+  description = "Availability Zones configured for the private subnets"
+  value = [
+    for idx, cidr in var.private_subnet_cidrs :
+    length(var.private_availability_zones) > idx ? var.private_availability_zones[idx] : var.availability_zones[idx]
+  ]
+}
+
 output "private_route_table_id" {
   description = "The ID of the private route table"
   value       = length(aws_route_table.private) > 0 ? aws_route_table.private[0].id : null

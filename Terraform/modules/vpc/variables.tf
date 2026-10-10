@@ -40,6 +40,18 @@ variable "private_availability_zones" {
   default     = []
 }
 
+variable "enable_nat_gateway" {
+  description = "Whether to create a NAT gateway for private-subnet outbound internet access"
+  type        = bool
+  default     = false
+}
+
+variable "eks_enabled" {
+  description = "Whether to add Kubernetes subnet discovery tags"
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Additional tags to apply to AWS resources"
   type        = map(string)

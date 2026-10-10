@@ -8,9 +8,16 @@ resource "aws_subnet" "private" {
   cidr_block        = each.value.cidr
   availability_zone = each.value.az
 
-  tags = merge(local.common_tags, {
-    Name = "${local.resource_name_prefix}-private-subnet-${each.key}"
-  })
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${local.resource_name_prefix}-private-subnet-${each.key}"
+    },
+    var.eks_enabled ? {
+      "kubernetes.io/cluster/${var.project_name}-${var.environment}" = "shared"
+      "kubernetes.io/role/internal-elb"                              = "1"
+    } : {}
+  )
 }
 
 resource "aws_route_table" "private" {
