@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-terraform:
+    name: Validate Terraform formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9
+
+      - name: Check Terraform formatting
+        run: terraform -chdir=Terraform fmt -check -recursive
+
+  test-client:
+    name: Build frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Application/client/package-lock.json
+
+      - name: Install dependencies
+        working-directory: Application/client
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: Application/client
+        run: npm run build
+
+  check-server:
+    name: Check backend JavaScript syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Application/server/package-lock.json
+
+      - name: Install dependencies
+        working-directory: Application/server
+        run: npm ci
+
+      - name: Check JavaScript syntax
+        working-directory: Application/server
+        run: find src -type f -name '*.js' -exec node --check {} \;
+
+  build-and-push:
+    name: Build and push images to ECR
+    needs:
+      - validate-terraform
+      - test-client
+      - check-server
+    if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ECR_REPOSITORY: cloudforge/cloudforge-ecr
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push frontend image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: client-${{ github.sha }}
+        run: |
+          docker build \
+            --file Application/client/Dockerfile \
+            --tag "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
+            Application
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Build and push backend image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: server-${{ github.sha }}
+        run: |
+          docker build \
+            --file Application/server/Dockerfile \
+            --tag "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
+            Application
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
