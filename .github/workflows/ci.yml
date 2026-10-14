@@ -7,6 +7,7 @@ on:
 permissions:
   contents: read
 
+
 jobs:
   validate-terraform:
     name: Validate Terraform formatting
