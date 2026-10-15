@@ -6,7 +6,7 @@
 /* ---------------------------------------------------------------------------
    Design tokens. shadcn/ui reads these variable names, so every generated
    component picks up the Relay palette automatically.
-   --------------------------------------------------------------------------- */
+   ------------------------------------------------------------------------ */
 :root {
   --radius: 0.9rem;
 
