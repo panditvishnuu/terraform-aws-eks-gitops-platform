@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: relay-client
-          image: vishnu827/relay-client:latest
+          image: 240783391682.dkr.ecr.ap-south-1.amazonaws.com/cloudforge/cloudforge-ecr:client-26a71bc45edfcc6a2ba685e04444568b106e61f1
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
