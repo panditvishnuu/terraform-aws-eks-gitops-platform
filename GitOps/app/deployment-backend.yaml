@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: relay-server
-          image: vishnu827/relay-server:latest
+          image: 240783391682.dkr.ecr.ap-south-1.amazonaws.com/cloudforge/cloudforge-ecr:server-26a71bc45edfcc6a2ba685e04444568b106e61f1
           env:
             - name: CLIENT_ORIGIN
               value: http://localhost:8080
